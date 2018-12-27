@@ -212,7 +212,7 @@ module powerbi.extensibility.visual {
         private barChartSettings: BarChartSettings;
         private tooltipServiceWrapper: ITooltipServiceWrapper;
         private locale: string;
-        private helpLinkElement: d3.Selection<any>;
+        //private helpLinkElement: d3.Selection<any>;
 
         private barSelection: d3.selection.Update<BarChartDataPoint>;
 
@@ -261,10 +261,10 @@ module powerbi.extensibility.visual {
                 .append('g')
                 .classed('xAxis', true);
 
-            const helpLinkElement: Element = this.createHelpLinkElement();
-            options.element.appendChild(helpLinkElement);
+            ////const helpLinkElement: Element = this.createHelpLinkElement();
+            ////options.element.appendChild(helpLinkElement);
 
-            this.helpLinkElement = d3.select(helpLinkElement);
+            ////this.helpLinkElement = d3.select(helpLinkElement);
         }
 
         /**
@@ -276,6 +276,7 @@ module powerbi.extensibility.visual {
          *                                        the visual had queried.
          */
         public update(options: VisualUpdateOptions) {
+            //debugger
             let viewModel: BarChartViewModel = visualTransform(options, this.host);
             let settings = this.barChartSettings = viewModel.settings;
             this.barDataPoints = viewModel.dataPoints;
@@ -288,22 +289,71 @@ module powerbi.extensibility.visual {
                 height: height
             });
 
-            if (settings.enableAxis.show) {
-                let margins = BarChart.Config.margins;
-                height -= margins.bottom;
-            }
+            //debugger
+            let _XScale = d3.scale.linear()
+                .domain([0, 300])
+                .range([0, width/3]);
 
-            this.helpLinkElement
-                .classed("hidden", !settings.generalView.showHelpLink)
-                .style({
-                    "border-color": settings.generalView.helpLinkColor,
-                    "color": settings.generalView.helpLinkColor,
-                });
+            let _barSelection = this.barContainer.selectAll('._bar')
+                .data([300,250,200]);
+            let _barSelection_line = this.barContainer.selectAll('._bar_line')
+                .data([300, 250, 200]);
+            _barSelection
+                .enter()
+                .append('path');
+            _barSelection_line
+                .enter()
+                .append('path');
+            _barSelection
+                .attr("d", function (d, i) {
+                    let _realvalue = _XScale(d);
+                    let _points = [];
+                    let _start_x = width / 2;
+                    let _start_y = 50;
+                    _points.push([_start_x, _start_y + i * 100]);
+                    _points.push([_start_x + _realvalue, _start_y + i * 100]);
+                    _points.push([_start_x + _realvalue+5, _start_y + i * 100 +25]);
+                    _points.push([_start_x + 5, _start_y + i * 100 + 25]); 
+                    let returnstr = _points.join(" L"); 
+                    return "M" + returnstr +" Z";
+                })
+                .attr('fill-opacity', 0.8)
+                .attr('stroke-opacity', 0.8)
+                .attr("stroke", "none")
+                .attr("stroke-width", 1)
+                .attr("fill", "#14427B");
+            _barSelection_line
+                .attr("d", function (d, i) {
+                    let _realvalue = _XScale(d);
+                    let _points = [];
+                    let _start_x = width / 2;
+                    let _start_y = 50;
+                    _points.push([_start_x, _start_y + i * 100]);
+                    _points.push([_start_x + 20, _start_y + i * 100 +80]);
+                    let returnstr = _points.join(" L");
+                    return "M" + returnstr ;
+                })
+                .attr('fill-opacity', 0.4)
+                .attr('stroke-opacity', 0.4)
+                .attr("stroke", "#14427B")
+                .attr("stroke-width", 1)
+                .attr("fill", "none");
+            //if (settings.enableAxis.show) {
+            //    let margins = BarChart.Config.margins;
+            //    height -= margins.bottom;
+            //}
 
-            this.xAxis.style({
-                "font-size": d3.min([height, width]) * BarChart.Config.xAxisFontMultiplier,
-                "fill": settings.enableAxis.fill,
-            });
+            //this.helpLinkElement
+            //    .classed("hidden", !settings.generalView.showHelpLink)
+            //    .style({
+            //        "border-color": settings.generalView.helpLinkColor,
+            //        "color": settings.generalView.helpLinkColor,
+            //    });
+
+            //this.xAxis.style({
+            //    "font-size": d3.min([height, width]) * BarChart.Config.xAxisFontMultiplier,
+            //    "fill": settings.enableAxis.fill,
+            //});
 
             let yScale = d3.scale.linear()
                 .domain([0, viewModel.dataMax])
@@ -313,15 +363,14 @@ module powerbi.extensibility.visual {
                 .domain(viewModel.dataPoints.map(d => d.category))
                 .rangeRoundBands([0, width], BarChart.Config.xScalePadding, 0.2);
 
-            let xAxis = d3.svg.axis()
-                .scale(xScale)
-                .orient('bottom');
+            //let xAxis = d3.svg.axis()
+            //    .scale(xScale)
+            //    .orient('bottom');
 
-            this.xAxis.attr('transform', 'translate(0, ' + height + ')')
-                .call(xAxis);
-
-            this.barSelection = this.barContainer
-                .selectAll('.bar')
+            //this.xAxis.attr('transform', 'translate(0, ' + height + ')')
+            //    .call(xAxis);
+            
+            this.barSelection = this.barContainer.selectAll('.bar')
                 .data(this.barDataPoints);
 
             this.barSelection
@@ -334,7 +383,7 @@ module powerbi.extensibility.visual {
             this.barSelection
                 .attr({
                     width: xScale.rangeBand(),
-                    height: d => height - yScale(<number>d.value),
+                    height:1,// d => height - yScale(<number>d.value),
                     y: d => yScale(<number>d.value),
                     x: d => xScale(d.category),
                 })
@@ -346,45 +395,45 @@ module powerbi.extensibility.visual {
                     "stroke-width": (dataPoint: BarChartDataPoint) => `${dataPoint.strokeWidth}px`,
                 });
 
-            this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('.bar'),
-                (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
-                (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
-            );
+            ////this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('.bar'),
+            ////    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
+            ////    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
+            ////);
 
-            this.syncSelectionState(
-                this.barSelection,
-                this.selectionManager.getSelectionIds() as ISelectionId[]
-            );
+            ////this.syncSelectionState(
+            ////    this.barSelection,
+            ////    this.selectionManager.getSelectionIds() as ISelectionId[]
+            ////);
 
-            this.barSelection.on('click', (d) => {
-                // Allow selection only if the visual is rendered in a view that supports interactivity (e.g. Report)
-                if (this.host.allowInteractions) {
-                    const isCtrlPressed: boolean = (d3.event as MouseEvent).ctrlKey;
+            ////this.barSelection.on('click', (d) => {
+            ////    // Allow selection only if the visual is rendered in a view that supports interactivity (e.g. Report)
+            ////    if (this.host.allowInteractions) {
+            ////        const isCtrlPressed: boolean = (d3.event as MouseEvent).ctrlKey;
 
-                    this.selectionManager
-                        .select(d.selectionId, isCtrlPressed)
-                        .then((ids: ISelectionId[]) => {
-                            this.syncSelectionState(this.barSelection, ids);
-                        });
+            ////        this.selectionManager
+            ////            .select(d.selectionId, isCtrlPressed)
+            ////            .then((ids: ISelectionId[]) => {
+            ////                this.syncSelectionState(this.barSelection, ids);
+            ////            });
 
-                    (<Event>d3.event).stopPropagation();
-                }
-            });
+            ////        (<Event>d3.event).stopPropagation();
+            ////    }
+            ////});
 
-            this.barSelection
-                .exit()
-                .remove();
+            ////this.barSelection
+            ////    .exit()
+            ////    .remove();
 
-            // Clear selection when clicking outside a bar
-            this.svg.on('click', (d) => {
-                if (this.host.allowInteractions) {
-                    this.selectionManager
-                        .clear()
-                        .then(() => {
-                            this.syncSelectionState(this.barSelection, []);
-                        });
-                }
-            });
+            ////// Clear selection when clicking outside a bar
+            ////this.svg.on('click', (d) => {
+            ////    if (this.host.allowInteractions) {
+            ////        this.selectionManager
+            ////            .clear()
+            ////            .then(() => {
+            ////                this.syncSelectionState(this.barSelection, []);
+            ////            });
+            ////    }
+            ////});
         }
 
         private syncSelectionState(
