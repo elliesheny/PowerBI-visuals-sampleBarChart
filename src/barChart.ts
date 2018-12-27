@@ -238,6 +238,7 @@ module powerbi.extensibility.visual {
          *                                             which contains services.
          */
         constructor(options: VisualConstructorOptions) {
+
             this.host = options.host;
             this.selectionManager = options.host.createSelectionManager();
 
