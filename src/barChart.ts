@@ -310,26 +310,66 @@ module powerbi.extensibility.visual {
 
             let _barSelection = this.barContainer.selectAll('._bar').data(this.barDataPoints);
             let _barSelection_line = this.barContainer.selectAll('._bar_line').data(this.barDataPoints);
+            let _barSelection_name = this.barContainer.selectAll('._bar_name').data(this.barDataPoints);
+            let _barSelection_value = this.barContainer.selectAll('._bar_value').data(this.barDataPoints);
             _barSelection.enter().append('path');
             _barSelection_line.enter().append('path');
+            _barSelection_name.enter().append('text');
+            _barSelection_value.enter().append('text');
             _barSelection.attr("d", function (d, i) { 
-                    return getAreaPath(d, i, _XScale, startpoint); 
+                return getAreaPath(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide); 
                 })
                 .attr('fill-opacity', 0.8)
                 .attr('stroke-opacity', 0.8)
                 .attr("stroke", "none")
                 .attr("stroke-width", 1) 
                 .attr("fill", "#14427B")
-                .classed('_bar', true);;
+                .classed('_bar', true);
             _barSelection_line
                 .attr("d", function (d, i) {
-                    return getLinePath(d, i, _XScale, startpoint);  
+                    return getLinePath(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide);  
                 })
                 .attr('fill-opacity', 0.4)
                 .attr('stroke-opacity', 0.4)
                 .attr("stroke", "#14427B")
                 .attr("stroke-width", 1)
-                .attr("fill", "none");
+                .attr("fill", "none")
+                .classed('_bar_line', true);
+
+
+            _barSelection_name
+                .attr('x', function (d, i) {
+                    return getNamePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).x;
+                })
+                .attr('y', function (d, i) {
+                    return getNamePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).y;
+                })
+                .style({
+                    'font-size': '14px',
+                    'fill': '#FFFFFF',
+                    'text-anchor': settings.generalView.showFromLeftSide ? 'start' : 'end',
+                    'pointer-events': 'none'
+                })
+                .text(function (d, i) {
+                    return d.category.toString();
+                });
+            _barSelection_value
+                .attr('x', function (d, i) {
+                    return getValuePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).x;
+                })
+                .attr('y', function (d, i) {
+                    return getValuePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).y;
+                })
+                .style({
+                    'font-size': '14px',
+                    'fill': '#FFFFFF',
+                    'text-anchor': settings.generalView.showFromLeftSide ?'start':'end',
+                    'pointer-events': 'none'
+                })
+                .text(function (d, i) {
+                    return d.value.toString();
+                });
+
 
             this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('._bar'),
                 (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
@@ -561,8 +601,8 @@ module powerbi.extensibility.visual {
             return [{
                 displayName: value.category,
                 value: value.value.toString(),
-                color: value.color,
-                header: language && "displayed language " + language
+                //color: value.color,
+                //header: language && "displayed language " + language
             }];
         }
 

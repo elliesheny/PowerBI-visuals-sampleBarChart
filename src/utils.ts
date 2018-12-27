@@ -33,27 +33,66 @@ module powerbi.extensibility.visual {
         else
             return { x: width - 5, y: 5 };
     }
-    export function getAreaPath(d:any, i :number, _XScale:any,startpoint:any) {
+    export function getAreaPath(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
         let _realvalue = _XScale(<number>d.value);
         let _points = [];
         let _start_x = startpoint.x;
         let _start_y = startpoint.y;
-        _points.push([_start_x, _start_y + i * 100]);
-        _points.push([_start_x + _realvalue, _start_y + i * 100]);
-        _points.push([_start_x + _realvalue + 5, _start_y + i * 100 + 25]);
-        _points.push([_start_x + 5, _start_y + i * 100 + 25]);
+        if (showleft) {
+            _points.push([_start_x, _start_y + i * 100]);
+            _points.push([_start_x + _realvalue, _start_y + i * 100]);
+            _points.push([_start_x + _realvalue + 5, _start_y + i * 100 + 25]);
+            _points.push([_start_x + 5, _start_y + i * 100 + 25]);
+        } else {
+            _points.push([_start_x, _start_y + i * 100]);
+            _points.push([_start_x - _realvalue, _start_y + i * 100]);
+            _points.push([_start_x - _realvalue - 5, _start_y + i * 100 + 25]);
+            _points.push([_start_x - 5, _start_y + i * 100 + 25]);
+        }
         let returnstr = _points.join(" L");
         return "M" + returnstr + " Z";
     }
 
-    export function getLinePath(d: any, i: number, _XScale: any, startpoint: any) {
+    export function getLinePath(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
         let _realvalue = _XScale(<number>d.value);
         let _points = [];
         let _start_x = startpoint.x;
         let _start_y = startpoint.y;
-        _points.push([_start_x, _start_y + i * 100]);
-        _points.push([_start_x + 20, _start_y + i * 100 + 80]);
+        if (showleft) {
+            _points.push([_start_x, _start_y + i * 100]);
+            _points.push([_start_x + 20, _start_y + i * 100 + 80]);
+        } else {
+            _points.push([_start_x, _start_y + i * 100]);
+            _points.push([_start_x - 20, _start_y + i * 100 + 80]);
+        }
         let returnstr = _points.join(" L");
         return "M" + returnstr;
+    }
+
+    export function getNamePoint(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
+        if (showleft) {
+            return {
+                x: startpoint.x + 15,
+                y: startpoint.y + i * 100 + 45
+            };
+        } else {
+            return {
+                x: startpoint.x - 15,
+                y: startpoint.y + i * 100 + 45
+            };
+        }
+    }
+    export function getValuePoint(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
+        if (showleft) {
+            return {
+                x: startpoint.x + 20,
+                y: startpoint.y + i * 100 + 65
+            };
+        } else {
+            return {
+                x: startpoint.x - 20,
+                y: startpoint.y + i * 100 + 65
+            };
+        }
     }
 }
