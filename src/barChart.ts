@@ -52,6 +52,9 @@ module powerbi.extensibility.visual {
             opacity: number;
             showHelpLink: boolean;
             helpLinkColor: string;
+            showDataCount: number;
+            showFromLeftSide: boolean;
+            dataForwardTop: boolean;
         };
     }
 
@@ -75,6 +78,9 @@ module powerbi.extensibility.visual {
                 opacity: 100,
                 showHelpLink: false,
                 helpLinkColor: "#80B0E0",
+                showDataCount:5,
+                showFromLeftSide:true,
+                dataForwardTop:true
             }
         };
         let viewModel: BarChartViewModel = {
@@ -113,6 +119,9 @@ module powerbi.extensibility.visual {
             generalView: {
                 opacity: getValue<number>(objects, 'generalView', 'opacity', defaultSettings.generalView.opacity),
                 showHelpLink: getValue<boolean>(objects, 'generalView', 'showHelpLink', defaultSettings.generalView.showHelpLink),
+                showDataCount: getValue<number>(objects, 'generalView', 'showDataCount', defaultSettings.generalView.showDataCount),
+                showFromLeftSide: getValue<boolean>(objects, 'generalView', 'showFromLeftSide', defaultSettings.generalView.showFromLeftSide),
+                dataForwardTop: getValue<boolean>(objects, 'generalView', 'dataForwardTop', defaultSettings.generalView.dataForwardTop),
                 helpLinkColor: strokeColor,
             },
         };
@@ -279,65 +288,54 @@ module powerbi.extensibility.visual {
             //debugger
             let viewModel: BarChartViewModel = visualTransform(options, this.host);
             let settings = this.barChartSettings = viewModel.settings;
-            this.barDataPoints = viewModel.dataPoints;
+            //this.barDataPoints = viewModel.dataPoints;
+
+
+            this.barDataPoints = getArrayValues(viewModel.dataPoints, settings.generalView.showDataCount, settings.generalView.dataForwardTop);
+
+            
 
             let width = options.viewport.width;
             let height = options.viewport.height;
 
-            this.svg.attr({
-                width: width,
-                height: height
-            });
 
-            //debugger
-            let _XScale = d3.scale.linear()
-                .domain([0, 300])
-                .range([0, width/3]);
+            let startpoint = getStartPoint(settings.generalView.showFromLeftSide, width, height);
 
-            let _barSelection = this.barContainer.selectAll('._bar')
-                .data([300,250,200]);
-            let _barSelection_line = this.barContainer.selectAll('._bar_line')
-                .data([300, 250, 200]);
-            _barSelection
-                .enter()
-                .append('path');
-            _barSelection_line
-                .enter()
-                .append('path');
-            _barSelection
-                .attr("d", function (d, i) {
-                    let _realvalue = _XScale(d);
-                    let _points = [];
-                    let _start_x = width / 2;
-                    let _start_y = 50;
-                    _points.push([_start_x, _start_y + i * 100]);
-                    _points.push([_start_x + _realvalue, _start_y + i * 100]);
-                    _points.push([_start_x + _realvalue+5, _start_y + i * 100 +25]);
-                    _points.push([_start_x + 5, _start_y + i * 100 + 25]); 
-                    let returnstr = _points.join(" L"); 
-                    return "M" + returnstr +" Z";
+
+            this.svg.attr({ width: width, height: height });
+
+            let _maxvalue = <number>this.barDataPoints[0].value;
+            let _minvalue = <number>this.barDataPoints[this.barDataPoints.length-1].value;
+            let _XScale = d3.scale.linear().domain([0, _maxvalue - (_maxvalue - _minvalue) * 2, _maxvalue]).range([0,0, width-15]);
+
+            let _barSelection = this.barContainer.selectAll('._bar').data(this.barDataPoints);
+            let _barSelection_line = this.barContainer.selectAll('._bar_line').data(this.barDataPoints);
+            _barSelection.enter().append('path');
+            _barSelection_line.enter().append('path');
+            _barSelection.attr("d", function (d, i) { 
+                    return getAreaPath(d, i, _XScale, startpoint); 
                 })
                 .attr('fill-opacity', 0.8)
                 .attr('stroke-opacity', 0.8)
                 .attr("stroke", "none")
-                .attr("stroke-width", 1)
-                .attr("fill", "#14427B");
+                .attr("stroke-width", 1) 
+                .attr("fill", "#14427B")
+                .classed('_bar', true);;
             _barSelection_line
                 .attr("d", function (d, i) {
-                    let _realvalue = _XScale(d);
-                    let _points = [];
-                    let _start_x = width / 2;
-                    let _start_y = 50;
-                    _points.push([_start_x, _start_y + i * 100]);
-                    _points.push([_start_x + 20, _start_y + i * 100 +80]);
-                    let returnstr = _points.join(" L");
-                    return "M" + returnstr ;
+                    return getLinePath(d, i, _XScale, startpoint);  
                 })
                 .attr('fill-opacity', 0.4)
                 .attr('stroke-opacity', 0.4)
                 .attr("stroke", "#14427B")
                 .attr("stroke-width", 1)
                 .attr("fill", "none");
+
+            this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('._bar'),
+                (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
+                (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
+            );
+
             //if (settings.enableAxis.show) {
             //    let margins = BarChart.Config.margins;
             //    height -= margins.bottom;
@@ -355,13 +353,13 @@ module powerbi.extensibility.visual {
             //    "fill": settings.enableAxis.fill,
             //});
 
-            let yScale = d3.scale.linear()
-                .domain([0, viewModel.dataMax])
-                .range([height, 0]);
+            //let yScale = d3.scale.linear()
+            //    .domain([0, viewModel.dataMax])
+            //    .range([height, 0]);
 
-            let xScale = d3.scale.ordinal()
-                .domain(viewModel.dataPoints.map(d => d.category))
-                .rangeRoundBands([0, width], BarChart.Config.xScalePadding, 0.2);
+            //let xScale = d3.scale.ordinal()
+            //    .domain(viewModel.dataPoints.map(d => d.category))
+            //    .rangeRoundBands([0, width], BarChart.Config.xScalePadding, 0.2);
 
             //let xAxis = d3.svg.axis()
             //    .scale(xScale)
@@ -370,35 +368,35 @@ module powerbi.extensibility.visual {
             //this.xAxis.attr('transform', 'translate(0, ' + height + ')')
             //    .call(xAxis);
             
-            this.barSelection = this.barContainer.selectAll('.bar')
-                .data(this.barDataPoints);
+            //this.barSelection = this.barContainer.selectAll('.bar')
+            //    .data(this.barDataPoints);
 
-            this.barSelection
-                .enter()
-                .append('rect')
-                .classed('bar', true);
+            //this.barSelection
+            //    .enter()
+            //    .append('rect')
+            //    .classed('bar', true);
 
-            const opacity: number = viewModel.settings.generalView.opacity / 100;
+            //const opacity: number = viewModel.settings.generalView.opacity / 100;
 
-            this.barSelection
-                .attr({
-                    width: xScale.rangeBand(),
-                    height:1,// d => height - yScale(<number>d.value),
-                    y: d => yScale(<number>d.value),
-                    x: d => xScale(d.category),
-                })
-                .style({
-                    'fill-opacity': opacity,
-                    'stroke-opacity': opacity,
-                    fill: (dataPoint: BarChartDataPoint) => dataPoint.color,
-                    stroke: (dataPoint: BarChartDataPoint) => dataPoint.strokeColor,
-                    "stroke-width": (dataPoint: BarChartDataPoint) => `${dataPoint.strokeWidth}px`,
-                });
+            //this.barSelection
+            //    .attr({
+            //        width: xScale.rangeBand(),
+            //        height:1,// d => height - yScale(<number>d.value),
+            //        y: d => yScale(<number>d.value),
+            //        x: d => xScale(d.category),
+            //    })
+            //    .style({
+            //        'fill-opacity': opacity,
+            //        'stroke-opacity': opacity,
+            //        fill: (dataPoint: BarChartDataPoint) => dataPoint.color,
+            //        stroke: (dataPoint: BarChartDataPoint) => dataPoint.strokeColor,
+            //        "stroke-width": (dataPoint: BarChartDataPoint) => `${dataPoint.strokeWidth}px`,
+            //    });
 
-            ////this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('.bar'),
-            ////    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
-            ////    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
-            ////);
+            //this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('.bar'),
+            //    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
+            //    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
+            //);
 
             ////this.syncSelectionState(
             ////    this.barSelection,
@@ -521,13 +519,22 @@ module powerbi.extensibility.visual {
                         objectName: objectName,
                         properties: {
                             opacity: this.barChartSettings.generalView.opacity,
-                            showHelpLink: this.barChartSettings.generalView.showHelpLink
+                            showHelpLink: this.barChartSettings.generalView.showHelpLink,
+                            showDataCount: this.barChartSettings.generalView.showDataCount,
+                            showFromLeftSide: this.barChartSettings.generalView.showFromLeftSide,
+                            dataForwardTop: this.barChartSettings.generalView.dataForwardTop,
                         },
                         validValues: {
                             opacity: {
                                 numberRange: {
                                     min: 10,
                                     max: 100
+                                }
+                            },
+                            showDataCount:{
+                                numberRange: {
+                                    min: 1,
+                                    max: 10
                                 }
                             }
                         },

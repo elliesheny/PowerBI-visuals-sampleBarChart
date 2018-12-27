@@ -78,20 +78,38 @@
         },
         "generalView": {
             "displayName": "General View",
-            "properties": {
-                "opacity": {
-                    "displayName": "Bars Opacity",
-                    "type": {
-                        "integer": true
-                    }
-                },
-                "showHelpLink": {
-                    "displayName": "Show Help Button",
-                    "type": {
-                        "bool": true
-                    }
-                }
+          "properties": {
+            "opacity": {
+              "displayName": "Bars Opacity",
+              "type": {
+                "integer": true
+              }
+            },
+            "showHelpLink": {
+              "displayName": "Show Help Button",
+              "type": {
+                "bool": true
+              }
+            },
+            "showDataCount": {
+              "displayName": "Show Data Record",
+              "type": {
+                "integer": true
+              }
+            },
+            "showFromLeftSide": {
+              "displayName": "Show From Left/Right",
+              "type": {
+                "bool": true
+              }
+            },
+            "dataForwardTop": {
+              "displayName": "Data Top/Down",
+              "type": {
+                "bool": true
+              }
             }
+          }
         }
     },
     "tooltips": {
