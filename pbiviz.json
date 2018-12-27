@@ -3,7 +3,7 @@
     "name": "X Bar",
     "displayName": "xbarChart",
     "guid": "PBI_CV_E41BB1AA_C2DB_4C3A_9935_B71FC8908151",
-    "visualClassName": "XBarChart",
+    "visualClassName": "BarChart",
     "version": "1.0.0",
     "description": "",
     "supportUrl": "",
