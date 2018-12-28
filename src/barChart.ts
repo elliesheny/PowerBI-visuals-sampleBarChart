@@ -127,7 +127,7 @@ module powerbi.extensibility.visual {
         };
 
         const strokeWidth: number = getColumnStrokeWidth(colorPalette.isHighContrast);
-
+        //debugger
         for (let i = 0, len = Math.max(category.values.length, dataValue.values.length); i < len; i++) {
             const color: string = getColumnColorByIndex(category, i, colorPalette);
 
@@ -286,7 +286,9 @@ module powerbi.extensibility.visual {
          */
         public update(options: VisualUpdateOptions) {
 
-
+            //options.dataViews[0].categorical.categories[0].values
+            //options.dataViews[0].categorical.values[0].values
+            //options.dataViews[0].categorical.values[0].highlights
 
             this.barContainer.selectAll('._bar').remove();
             this.barContainer.selectAll('._bar_line').remove();
@@ -400,7 +402,7 @@ module powerbi.extensibility.visual {
                     this.selectionManager
                         .select(d.selectionId, isCtrlPressed)
                         .then((ids: ISelectionId[]) => {
-                            this.syncSelectionState(this.barSelection, ids);
+                            this.syncSelectionState(_barSelection, ids);
                         });
 
                     (<Event>d3.event).stopPropagation();
@@ -415,7 +417,7 @@ module powerbi.extensibility.visual {
                     this.selectionManager
                         .clear()
                         .then(() => {
-                            this.syncSelectionState(this.barSelection, []);
+                            this.syncSelectionState(_barSelection, []);
                         });
                 }
             });
@@ -527,7 +529,6 @@ module powerbi.extensibility.visual {
             if (!selection || !selectionIds) {
                 return;
             }
-
             if (!selectionIds.length) {
                 selection.style({
                     "fill-opacity": null,
@@ -536,7 +537,7 @@ module powerbi.extensibility.visual {
 
                 return;
             }
-            debugger
+
             const self: this = this;
 
             selection.each(function (barDataPoint: BarChartDataPoint) {
