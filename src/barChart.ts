@@ -285,7 +285,16 @@ module powerbi.extensibility.visual {
          *                                        the visual had queried.
          */
         public update(options: VisualUpdateOptions) {
-            //debugger
+
+
+
+            this.barContainer.selectAll('._bar').remove();
+            this.barContainer.selectAll('._bar_line').remove();
+            this.barContainer.selectAll('._bar_name').remove();
+            this.barContainer.selectAll('._bar_value').remove();
+
+
+
             let viewModel: BarChartViewModel = visualTransform(options, this.host);
             let settings = this.barChartSettings = viewModel.settings;
             //this.barDataPoints = viewModel.dataPoints;
@@ -375,6 +384,43 @@ module powerbi.extensibility.visual {
                 (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
                 (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
             );
+
+
+
+            this.syncSelectionState(
+                _barSelection,
+                this.selectionManager.getSelectionIds() as ISelectionId[]
+            );
+
+            _barSelection.on('click', (d) => {
+                // Allow selection only if the visual is rendered in a view that supports interactivity (e.g. Report)
+                if (this.host.allowInteractions) {
+                    const isCtrlPressed: boolean = (d3.event as MouseEvent).ctrlKey;
+
+                    this.selectionManager
+                        .select(d.selectionId, isCtrlPressed)
+                        .then((ids: ISelectionId[]) => {
+                            this.syncSelectionState(this.barSelection, ids);
+                        });
+
+                    (<Event>d3.event).stopPropagation();
+                }
+            });
+
+            _barSelection.exit().remove();
+
+            ////// Clear selection when clicking outside a bar
+            this.svg.on('click', (d) => {
+                if (this.host.allowInteractions) {
+                    this.selectionManager
+                        .clear()
+                        .then(() => {
+                            this.syncSelectionState(this.barSelection, []);
+                        });
+                }
+            });
+
+
 
             //if (settings.enableAxis.show) {
             //    let margins = BarChart.Config.margins;
@@ -477,7 +523,7 @@ module powerbi.extensibility.visual {
         private syncSelectionState(
             selection: d3.Selection<BarChartDataPoint>,
             selectionIds: ISelectionId[]
-        ): void {
+        ): void { 
             if (!selection || !selectionIds) {
                 return;
             }
@@ -490,7 +536,7 @@ module powerbi.extensibility.visual {
 
                 return;
             }
-
+            debugger
             const self: this = this;
 
             selection.each(function (barDataPoint: BarChartDataPoint) {
