@@ -334,7 +334,7 @@ module powerbi.extensibility.visual {
                 .attr('stroke-opacity', 0.8)
                 .attr("stroke", "none")
                 .attr("stroke-width", 1) 
-                .attr("fill", "#14427B")
+                .attr("fill", "#18477F")
                 .classed('_bar', true);
             _barSelection_line
                 .attr("d", function (d, i) {
@@ -342,7 +342,7 @@ module powerbi.extensibility.visual {
                 })
                 .attr('fill-opacity', 0.4)
                 .attr('stroke-opacity', 0.4)
-                .attr("stroke", "#14427B")
+                .attr("stroke", "#A1BEFF")
                 .attr("stroke-width", 1)
                 .attr("fill", "none")
                 .classed('_bar_line', true);
@@ -356,10 +356,11 @@ module powerbi.extensibility.visual {
                     return getNamePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).y;
                 })
                 .style({
-                    'font-size': '14px',
-                    'fill': '#FFFFFF',
+                    'font-size': '21px',
+                    'fill': '#A1BEFF',
                     'text-anchor': settings.generalView.showFromLeftSide ? 'start' : 'end',
-                    'pointer-events': 'none'
+                    'pointer-events': 'none',
+                    'transform': settings.generalView.showFromLeftSide ? 'skewX(13deg)' : 'skewX(-13deg)'
                 })
                 .text(function (d, i) {
                     return d.category.toString();
@@ -372,10 +373,11 @@ module powerbi.extensibility.visual {
                     return getValuePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).y;
                 })
                 .style({
-                    'font-size': '14px',
-                    'fill': '#FFFFFF',
+                    'font-size': '21px',
+                    'fill': '#A1BEFF',
                     'text-anchor': settings.generalView.showFromLeftSide ?'start':'end',
-                    'pointer-events': 'none'
+                    'pointer-events': 'none',
+                    'transform': settings.generalView.showFromLeftSide ? 'skewX(13deg)' : 'skewX(-13deg)'
                 })
                 .text(function (d, i) {
                     return d.value.toString();

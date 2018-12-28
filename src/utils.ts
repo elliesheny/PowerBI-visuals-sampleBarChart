@@ -41,13 +41,13 @@ module powerbi.extensibility.visual {
         if (showleft) {
             _points.push([_start_x, _start_y + i * 100]);
             _points.push([_start_x + _realvalue, _start_y + i * 100]);
-            _points.push([_start_x + _realvalue + 5, _start_y + i * 100 + 25]);
-            _points.push([_start_x + 5, _start_y + i * 100 + 25]);
+            _points.push([_start_x + _realvalue + 10, _start_y + i * 100 + 35]);
+            _points.push([_start_x + 10, _start_y + i * 100 + 35]);
         } else {
             _points.push([_start_x, _start_y + i * 100]);
             _points.push([_start_x - _realvalue, _start_y + i * 100]);
-            _points.push([_start_x - _realvalue - 5, _start_y + i * 100 + 25]);
-            _points.push([_start_x - 5, _start_y + i * 100 + 25]);
+            _points.push([_start_x - _realvalue - 10, _start_y + i * 100 + 35]);
+            _points.push([_start_x - 10, _start_y + i * 100 + 35]);
         }
         let returnstr = _points.join(" L");
         return "M" + returnstr + " Z";
@@ -72,26 +72,26 @@ module powerbi.extensibility.visual {
     export function getNamePoint(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
         if (showleft) {
             return {
-                x: startpoint.x + 15,
-                y: startpoint.y + i * 100 + 45
+                x: startpoint.x + 15 - Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                y: startpoint.y + i * 100 + 60
             };
         } else {
             return {
-                x: startpoint.x - 15,
-                y: startpoint.y + i * 100 + 45
+                x: startpoint.x - 15 + Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                y: startpoint.y + i * 100 + 60
             };
         }
     }
     export function getValuePoint(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
         if (showleft) {
             return {
-                x: startpoint.x + 20,
-                y: startpoint.y + i * 100 + 65
+                x: startpoint.x + 20 - Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                y: startpoint.y + i * 100 + 90
             };
         } else {
             return {
-                x: startpoint.x - 20,
-                y: startpoint.y + i * 100 + 65
+                x: startpoint.x - 20 + Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                y: startpoint.y + i * 100 + 90
             };
         }
     }
