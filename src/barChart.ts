@@ -248,19 +248,19 @@ module powerbi.extensibility.visual {
 
             this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, options.element);
 
-            this.svg = d3.select(options.element)
-                .append('svg')
-                .classed('barChart', true);
+            //this.svg = d3.select(options.element)
+            //    .append('svg')
+            //    .classed('barChart', true);
 
-            this.locale = options.host.locale;
+            //this.locale = options.host.locale;
 
-            this.barContainer = this.svg
-                .append('g')
-                .classed('barContainer', true);
+            //this.barContainer = this.svg
+            //    .append('g')
+            //    .classed('barContainer', true);
 
-            this.xAxis = this.svg
-                .append('g')
-                .classed('xAxis', true);
+            //this.xAxis = this.svg
+            //    .append('g')
+            //    .classed('xAxis', true);
 
             //const helpLinkElement: Element = this.createHelpLinkElement();
             //options.element.appendChild(helpLinkElement);

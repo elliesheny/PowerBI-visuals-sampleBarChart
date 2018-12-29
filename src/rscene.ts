@@ -18,15 +18,15 @@ module powerbi.extensibility.visual {
             //super();
             //this.setting = settings;  
             this.scene = new THREE.Scene();
-            this.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
             options.element.appendChild(this.renderer.domElement);
             //debugger
 
 
-            this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10000);
+            this.camera = new THREE.PerspectiveCamera(45, 3/4, 0.1, 10000);
             //this.camera = new THREE.OrthographicCamera(-150, 150, 100, -100,-200,500);
             this.renderer.setSize(200, 200);
-            this.renderer.setClearColor(0xADE7FB, 1);
+            this.renderer.setClearColor(0xFFFFFF, 0);
             this.renderer.shadowMapEnabled = true;
             //this.camera.lookAt(new THREE.Vector3(0,0,0));
 
@@ -52,18 +52,18 @@ module powerbi.extensibility.visual {
             //this.china.castShadow = true;
             //this.scene.add(this.china);
 
-            this.camera.position.set(0, -(100 / 2 / Math.tan(22.5)), 5);
+            this.camera.position.set(0, 0, 50);
             this.camera.lookAt(this.scene.position);
 
 
 
 
-            var planeGeometry = new THREE.PlaneGeometry(2000, 2000, 1, 1);
+            var planeGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
             var planeMaterial = new THREE.MeshLambertMaterial(
                 { color: 0xADE7FB });
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.receiveShadow = true;
-            plane.position.z = -0.2;
+            plane.position.z = 0;
             plane.receiveShadow = true;
             this.scene.add(plane);
 
@@ -100,11 +100,7 @@ module powerbi.extensibility.visual {
             
 
             const render: FrameRequestCallback = () => {
-                try {
-                    this.renderer.render(this.scene, this.camera);
-                } catch (e) {
-                    console.error(e);
-                }
+                this.renderer.render(this.scene, this.camera);
                 this.animationFrameId = requestAnimationFrame(render);
             };
 
