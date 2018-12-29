@@ -15,6 +15,7 @@
     "src/barChart.ts",
     "src/objectEnumerationUtility.ts",
     "src/localization/localizationHelper.ts",
-    "src/localization/localizedResources.ts"
+    "src/localization/localizedResources.ts",
+    "src/rscene.ts"
   ]
 }

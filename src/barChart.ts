@@ -213,7 +213,7 @@ module powerbi.extensibility.visual {
         private tooltipServiceWrapper: ITooltipServiceWrapper;
         private locale: string;
         private helpLinkElement: d3.Selection<any>;
-
+        private _scene: _RScene;
         private barSelection: d3.selection.Update<BarChartDataPoint>;
 
         static Config = {
@@ -262,10 +262,18 @@ module powerbi.extensibility.visual {
                 .append('g')
                 .classed('xAxis', true);
 
-            const helpLinkElement: Element = this.createHelpLinkElement();
-            options.element.appendChild(helpLinkElement);
+            //const helpLinkElement: Element = this.createHelpLinkElement();
+            //options.element.appendChild(helpLinkElement);
 
-            this.helpLinkElement = d3.select(helpLinkElement);
+            //this.helpLinkElement = d3.select(helpLinkElement);
+
+
+
+
+            this._scene = new _RScene(options);
+
+
+
         }
 
         /**
@@ -281,111 +289,112 @@ module powerbi.extensibility.visual {
             let settings = this.barChartSettings = viewModel.settings;
             this.barDataPoints = viewModel.dataPoints;
 
-            let width = options.viewport.width;
-            let height = options.viewport.height;
+            this._scene.Update(options);
+            ////let width = options.viewport.width;
+            ////let height = options.viewport.height;
 
-            this.svg.attr({
-                width: width,
-                height: height
-            });
+            ////this.svg.attr({
+            ////    width: width,
+            ////    height: height
+            ////});
 
-            if (settings.enableAxis.show) {
-                let margins = BarChart.Config.margins;
-                height -= margins.bottom;
-            }
+            ////if (settings.enableAxis.show) {
+            ////    let margins = BarChart.Config.margins;
+            ////    height -= margins.bottom;
+            ////}
 
-            this.helpLinkElement
-                .classed("hidden", !settings.generalView.showHelpLink)
-                .style({
-                    "border-color": settings.generalView.helpLinkColor,
-                    "color": settings.generalView.helpLinkColor,
-                });
+            ////this.helpLinkElement
+            ////    .classed("hidden", !settings.generalView.showHelpLink)
+            ////    .style({
+            ////        "border-color": settings.generalView.helpLinkColor,
+            ////        "color": settings.generalView.helpLinkColor,
+            ////    });
 
-            this.xAxis.style({
-                "font-size": d3.min([height, width]) * BarChart.Config.xAxisFontMultiplier,
-                "fill": settings.enableAxis.fill,
-            });
+            ////this.xAxis.style({
+            ////    "font-size": d3.min([height, width]) * BarChart.Config.xAxisFontMultiplier,
+            ////    "fill": settings.enableAxis.fill,
+            ////});
 
-            let yScale = d3.scale.linear()
-                .domain([0, viewModel.dataMax])
-                .range([height, 0]);
+            ////let yScale = d3.scale.linear()
+            ////    .domain([0, viewModel.dataMax])
+            ////    .range([height, 0]);
 
-            let xScale = d3.scale.ordinal()
-                .domain(viewModel.dataPoints.map(d => d.category))
-                .rangeRoundBands([0, width], BarChart.Config.xScalePadding, 0.2);
+            ////let xScale = d3.scale.ordinal()
+            ////    .domain(viewModel.dataPoints.map(d => d.category))
+            ////    .rangeRoundBands([0, width], BarChart.Config.xScalePadding, 0.2);
 
-            let xAxis = d3.svg.axis()
-                .scale(xScale)
-                .orient('bottom');
+            ////let xAxis = d3.svg.axis()
+            ////    .scale(xScale)
+            ////    .orient('bottom');
 
-            this.xAxis.attr('transform', 'translate(0, ' + height + ')')
-                .call(xAxis);
+            ////this.xAxis.attr('transform', 'translate(0, ' + height + ')')
+            ////    .call(xAxis);
 
-            this.barSelection = this.barContainer
-                .selectAll('.bar')
-                .data(this.barDataPoints);
+            ////this.barSelection = this.barContainer
+            ////    .selectAll('.bar')
+            ////    .data(this.barDataPoints);
 
-            this.barSelection
-                .enter()
-                .append('rect')
-                .classed('bar', true);
+            ////this.barSelection
+            ////    .enter()
+            ////    .append('rect')
+            ////    .classed('bar', true);
 
-            const opacity: number = viewModel.settings.generalView.opacity / 100;
+            ////const opacity: number = viewModel.settings.generalView.opacity / 100;
 
-            this.barSelection
-                .attr({
-                    width: xScale.rangeBand(),
-                    height: d => height - yScale(<number>d.value),
-                    y: d => yScale(<number>d.value),
-                    x: d => xScale(d.category),
-                })
-                .style({
-                    'fill-opacity': opacity,
-                    'stroke-opacity': opacity,
-                    fill: (dataPoint: BarChartDataPoint) => dataPoint.color,
-                    stroke: (dataPoint: BarChartDataPoint) => dataPoint.strokeColor,
-                    "stroke-width": (dataPoint: BarChartDataPoint) => `${dataPoint.strokeWidth}px`,
-                });
+            ////this.barSelection
+            ////    .attr({
+            ////        width: xScale.rangeBand(),
+            ////        height: d => height - yScale(<number>d.value),
+            ////        y: d => yScale(<number>d.value),
+            ////        x: d => xScale(d.category),
+            ////    })
+            ////    .style({
+            ////        'fill-opacity': opacity,
+            ////        'stroke-opacity': opacity,
+            ////        fill: (dataPoint: BarChartDataPoint) => dataPoint.color,
+            ////        stroke: (dataPoint: BarChartDataPoint) => dataPoint.strokeColor,
+            ////        "stroke-width": (dataPoint: BarChartDataPoint) => `${dataPoint.strokeWidth}px`,
+            ////    });
 
-            this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('.bar'),
-                (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
-                (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
-            );
+            ////this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('.bar'),
+            ////    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => this.getTooltipData(tooltipEvent.data),
+            ////    (tooltipEvent: TooltipEventArgs<BarChartDataPoint>) => tooltipEvent.data.selectionId
+            ////);
 
-            this.syncSelectionState(
-                this.barSelection,
-                this.selectionManager.getSelectionIds() as ISelectionId[]
-            );
+            ////this.syncSelectionState(
+            ////    this.barSelection,
+            ////    this.selectionManager.getSelectionIds() as ISelectionId[]
+            ////);
 
-            this.barSelection.on('click', (d) => {
-                // Allow selection only if the visual is rendered in a view that supports interactivity (e.g. Report)
-                if (this.host.allowInteractions) {
-                    const isCtrlPressed: boolean = (d3.event as MouseEvent).ctrlKey;
+            ////this.barSelection.on('click', (d) => {
+            ////    // Allow selection only if the visual is rendered in a view that supports interactivity (e.g. Report)
+            ////    if (this.host.allowInteractions) {
+            ////        const isCtrlPressed: boolean = (d3.event as MouseEvent).ctrlKey;
 
-                    this.selectionManager
-                        .select(d.selectionId, isCtrlPressed)
-                        .then((ids: ISelectionId[]) => {
-                            this.syncSelectionState(this.barSelection, ids);
-                        });
+            ////        this.selectionManager
+            ////            .select(d.selectionId, isCtrlPressed)
+            ////            .then((ids: ISelectionId[]) => {
+            ////                this.syncSelectionState(this.barSelection, ids);
+            ////            });
 
-                    (<Event>d3.event).stopPropagation();
-                }
-            });
+            ////        (<Event>d3.event).stopPropagation();
+            ////    }
+            ////});
 
-            this.barSelection
-                .exit()
-                .remove();
+            ////this.barSelection
+            ////    .exit()
+            ////    .remove();
 
-            // Clear selection when clicking outside a bar
-            this.svg.on('click', (d) => {
-                if (this.host.allowInteractions) {
-                    this.selectionManager
-                        .clear()
-                        .then(() => {
-                            this.syncSelectionState(this.barSelection, []);
-                        });
-                }
-            });
+            ////// Clear selection when clicking outside a bar
+            ////this.svg.on('click', (d) => {
+            ////    if (this.host.allowInteractions) {
+            ////        this.selectionManager
+            ////            .clear()
+            ////            .then(() => {
+            ////                this.syncSelectionState(this.barSelection, []);
+            ////            });
+            ////    }
+            ////});
         }
 
         private syncSelectionState(

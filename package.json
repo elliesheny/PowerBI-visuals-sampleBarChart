@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@types/d3": "3.5.36",
+    "@types/jquery": "^3.3.29",
     "@types/three": "0.0.29",
     "d3": "3.5.5",
     "powerbi-visuals-tools": "1.13.0",
@@ -17,6 +18,7 @@
     "tslint-microsoft-contrib": "4.0.0"
   },
   "dependencies": {
+    "jquery": "^3.3.1",
     "three": "0.75.0"
   }
 }
