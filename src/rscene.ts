@@ -58,7 +58,7 @@ module powerbi.extensibility.visual {
 
 
 
-            var planeGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
+            var planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1);
             var planeMaterial = new THREE.MeshLambertMaterial(
                 { color: 0xADE7FB });
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
