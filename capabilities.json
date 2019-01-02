@@ -250,19 +250,19 @@
           }
         },
         "showFromLeftSide": {
-          "displayName": "Show From Left/Right",
+          "displayName": "Align Left/Right",
           "type": {
             "bool": true
           }
         },
         "dataForwardTop": {
-          "displayName": "Data Top/Down",
+          "displayName": "Data Order Desc/Asc",
           "type": {
             "bool": true
           }
         },
         "dataBarLongToShort": {
-          "displayName": "Bar Length Long to Short",
+          "displayName": "Scale Big Top/Down",
           "type": {
             "bool": true
           }
