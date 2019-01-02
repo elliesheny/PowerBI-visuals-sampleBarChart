@@ -31,6 +31,7 @@ module powerbi.extensibility.visual {
         color: string;
         strokeColor: string;
         strokeWidth: number;
+        valuedisplay: any;
         selectionId: ISelectionId;
     };
 
@@ -47,14 +48,19 @@ module powerbi.extensibility.visual {
             show: boolean;
             fill: string;
         };
-
         generalView: {
-            opacity: number;
-            showHelpLink: boolean;
-            helpLinkColor: string;
+            opacity: number;  
+            barColor: Fill; 
+            fontColor: Fill; 
+            fontSkewangle: number;
+            fontSize: number;
+            fontFamily: string;
+        };
+        dataControl: {
             showDataCount: number;
             showFromLeftSide: boolean;
-            dataForwardTop: boolean;
+            dataForwardTop: boolean; 
+            dataBarLongToShort: boolean; 
         };
     }
 
@@ -75,12 +81,18 @@ module powerbi.extensibility.visual {
                 fill: "#000000",
             },
             generalView: {
-                opacity: 100,
-                showHelpLink: false,
-                helpLinkColor: "#80B0E0",
-                showDataCount:5,
-                showFromLeftSide:true,
-                dataForwardTop:true
+                opacity: 80,    
+                barColor: { solid: { color: "#18477F" } },//53544F
+                fontColor: { solid: { color: "#18477F" } },
+                fontSkewangle: 13,
+                fontSize: 21,
+                fontFamily: 'wf_standard-font,helvetica,arial,sans-serif'
+            },
+            dataControl: { 
+                showDataCount: 5,
+                showFromLeftSide: true,
+                dataForwardTop: true, 
+                dataBarLongToShort: true,
             }
         };
         let viewModel: BarChartViewModel = {
@@ -101,6 +113,7 @@ module powerbi.extensibility.visual {
 
         let categorical = dataViews[0].categorical;
         let category = categorical.categories[0];
+        let datavaluedisplay = categorical.categories.length > 1 ? categorical.categories[1]:categorical.values[0];
         let dataValue = categorical.values[0];
 
         let barChartDataPoints: BarChartDataPoint[] = [];
@@ -117,12 +130,18 @@ module powerbi.extensibility.visual {
                 fill: getAxisTextFillColor(objects, colorPalette, defaultSettings.enableAxis.fill),
             },
             generalView: {
-                opacity: getValue<number>(objects, 'generalView', 'opacity', defaultSettings.generalView.opacity),
-                showHelpLink: getValue<boolean>(objects, 'generalView', 'showHelpLink', defaultSettings.generalView.showHelpLink),
-                showDataCount: getValue<number>(objects, 'generalView', 'showDataCount', defaultSettings.generalView.showDataCount),
-                showFromLeftSide: getValue<boolean>(objects, 'generalView', 'showFromLeftSide', defaultSettings.generalView.showFromLeftSide),
-                dataForwardTop: getValue<boolean>(objects, 'generalView', 'dataForwardTop', defaultSettings.generalView.dataForwardTop),
-                helpLinkColor: strokeColor,
+                opacity: getValue<number>(objects, 'generalView', 'opacity', defaultSettings.generalView.opacity),  
+                barColor: getValue<Fill>(objects, 'generalView', 'barColor', defaultSettings.generalView.barColor), 
+                fontColor: getValue<Fill>(objects, 'generalView', 'fontColor', defaultSettings.generalView.fontColor), 
+                fontSkewangle: getValue<number>(objects, 'generalView', 'fontSkewangle', defaultSettings.generalView.fontSkewangle),
+                fontSize: getValue<number>(objects, 'generalView', 'fontSize', defaultSettings.generalView.fontSize),
+                fontFamily: getValue<string>(objects, 'generalView', 'fontFamily', defaultSettings.generalView.fontFamily),
+            },
+            dataControl: { 
+                showDataCount: getValue<number>(objects, 'dataControl', 'showDataCount', defaultSettings.dataControl.showDataCount),
+                showFromLeftSide: getValue<boolean>(objects, 'dataControl', 'showFromLeftSide', defaultSettings.dataControl.showFromLeftSide),
+                dataForwardTop: getValue<boolean>(objects, 'dataControl', 'dataForwardTop', defaultSettings.dataControl.dataForwardTop),
+                dataBarLongToShort: getValue<boolean>(objects, 'dataControl', 'dataBarLongToShort', defaultSettings.dataControl.dataBarLongToShort),
             },
         };
 
@@ -141,6 +160,7 @@ module powerbi.extensibility.visual {
                 strokeWidth,
                 selectionId,
                 value: dataValue.values[i],
+                valuedisplay: datavaluedisplay.values[i],
                 category: `${category.values[i]}`,
             });
         }
@@ -296,13 +316,12 @@ module powerbi.extensibility.visual {
             this.barContainer.selectAll('._bar_value').remove();
 
 
-
             let viewModel: BarChartViewModel = visualTransform(options, this.host);
             let settings = this.barChartSettings = viewModel.settings;
             //this.barDataPoints = viewModel.dataPoints;
 
 
-            this.barDataPoints = getArrayValues(viewModel.dataPoints, settings.generalView.showDataCount, settings.generalView.dataForwardTop);
+            this.barDataPoints = getArrayValues(viewModel.dataPoints, settings.dataControl.showDataCount, settings.dataControl.dataForwardTop);
 
             
 
@@ -310,14 +329,22 @@ module powerbi.extensibility.visual {
             let height = options.viewport.height;
 
 
-            let startpoint = getStartPoint(settings.generalView.showFromLeftSide, width, height);
+            let startpoint = getStartPoint(settings.dataControl.showFromLeftSide, width, height);
 
 
             this.svg.attr({ width: width, height: height });
 
-            let _maxvalue = <number>this.barDataPoints[0].value;
-            let _minvalue = <number>this.barDataPoints[this.barDataPoints.length-1].value;
-            let _XScale = d3.scale.linear().domain([0, _maxvalue - (_maxvalue - _minvalue) * 2, _maxvalue]).range([0,0, width-15]);
+            let _maxvalue = settings.dataControl.dataForwardTop ? <number>this.barDataPoints[0].value : <number>this.barDataPoints[this.barDataPoints.length - 1].value;
+            let _minvalue = settings.dataControl.dataForwardTop ? <number>this.barDataPoints[this.barDataPoints.length - 1].value : <number>this.barDataPoints[0].value ;
+            let _XScale = null;//d3.scale.linear().domain([0, _maxvalue - (_maxvalue - _minvalue) * 1.5, _maxvalue]).range([0, 0, width - 15]);
+
+            if ((settings.dataControl.dataForwardTop && settings.dataControl.dataBarLongToShort)
+                || (!settings.dataControl.dataForwardTop && !settings.dataControl.dataBarLongToShort)){
+                _XScale = d3.scale.linear().domain([0, _minvalue, _maxvalue]).range([0, (width - 15) / 3, width - 15]);
+            } else if ((settings.dataControl.dataForwardTop && !settings.dataControl.dataBarLongToShort)
+                || (!settings.dataControl.dataForwardTop && settings.dataControl.dataBarLongToShort)){
+                _XScale = d3.scale.linear().domain([0, _minvalue, _maxvalue]).range([0, width - 15, (width - 15) / 3]);
+            } 
 
             let _barSelection = this.barContainer.selectAll('._bar').data(this.barDataPoints);
             let _barSelection_line = this.barContainer.selectAll('._bar_line').data(this.barDataPoints);
@@ -328,20 +355,20 @@ module powerbi.extensibility.visual {
             _barSelection_name.enter().append('text');
             _barSelection_value.enter().append('text');
             _barSelection.attr("d", function (d, i) { 
-                return getAreaPath(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide); 
+                return getAreaPath(d, i, _XScale, startpoint, settings.dataControl.showFromLeftSide); 
                 })
-                .attr('fill-opacity', 0.8)
-                .attr('stroke-opacity', 0.8)
+                .attr('fill-opacity', (settings.generalView.opacity/100.0))
+                .attr('stroke-opacity', (settings.generalView.opacity / 100.0))
                 .attr("stroke", "none")
-                .attr("stroke-width", 1) 
-                .attr("fill", "#18477F")
+                .attr("stroke-width", 1)
+                .attr("fill", settings.generalView.barColor.solid.color)//"#18477F"
                 .classed('_bar', true);
             _barSelection_line
                 .attr("d", function (d, i) {
-                    return getLinePath(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide);  
+                    return getLinePath(d, i, _XScale, startpoint, settings.dataControl.showFromLeftSide);  
                 })
-                .attr('fill-opacity', 0.4)
-                .attr('stroke-opacity', 0.4)
+                .attr('fill-opacity', (settings.generalView.opacity / 200.0))
+                .attr('stroke-opacity', (settings.generalView.opacity / 200.0))
                 .attr("stroke", "#A1BEFF")
                 .attr("stroke-width", 1)
                 .attr("fill", "none")
@@ -350,38 +377,42 @@ module powerbi.extensibility.visual {
 
             _barSelection_name
                 .attr('x', function (d, i) {
-                    return getNamePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).x;
+                    return getNamePoint(d, i, _XScale, startpoint, settings).x;
                 })
                 .attr('y', function (d, i) {
-                    return getNamePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).y;
+                    return getNamePoint(d, i, _XScale, startpoint, settings).y;
                 })
                 .style({
-                    'font-size': '21px',
-                    'fill': '#A1BEFF',
-                    'text-anchor': settings.generalView.showFromLeftSide ? 'start' : 'end',
+                    'font-size': settings.generalView.fontSize + 'px',
+                    'font-family': settings.generalView.fontFamily,
+                    'fill': settings.generalView.fontColor.solid.color,
+                    'text-anchor': settings.dataControl.showFromLeftSide ? 'start' : 'end',
                     'pointer-events': 'none',
-                    'transform': settings.generalView.showFromLeftSide ? 'skewX(13deg)' : 'skewX(-13deg)'
+                    'transform': settings.dataControl.showFromLeftSide ? 'skewX(' + settings.generalView.fontSkewangle + 'deg)' : 'skewX(-' + settings.generalView.fontSkewangle+'deg)'
                 })
                 .text(function (d, i) {
                     return d.category.toString();
-                });
+                })
+                .classed('_bar_name', true);;
             _barSelection_value
                 .attr('x', function (d, i) {
-                    return getValuePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).x;
+                    return getValuePoint(d, i, _XScale, startpoint, settings).x;
                 })
                 .attr('y', function (d, i) {
-                    return getValuePoint(d, i, _XScale, startpoint, settings.generalView.showFromLeftSide).y;
+                    return getValuePoint(d, i, _XScale, startpoint, settings).y;
                 })
                 .style({
-                    'font-size': '21px',
-                    'fill': '#A1BEFF',
-                    'text-anchor': settings.generalView.showFromLeftSide ?'start':'end',
+                    'font-size': settings.generalView.fontSize + 'px',
+                    'font-family': settings.generalView.fontFamily,
+                    'fill': settings.generalView.fontColor.solid.color,
+                    'text-anchor': settings.dataControl.showFromLeftSide ?'start':'end',
                     'pointer-events': 'none',
-                    'transform': settings.generalView.showFromLeftSide ? 'skewX(13deg)' : 'skewX(-13deg)'
+                    'transform': settings.dataControl.showFromLeftSide ? 'skewX(' + settings.generalView.fontSkewangle + 'deg)' : 'skewX(-' + settings.generalView.fontSkewangle+'deg)'
                 })
                 .text(function (d, i) {
-                    return d.value.toString();
-                });
+                    return d.valuedisplay.toString();
+                })
+                .classed('_bar_value', true);;
 
 
             this.tooltipServiceWrapper.addTooltip(this.barContainer.selectAll('._bar'),
@@ -607,11 +638,14 @@ module powerbi.extensibility.visual {
                     objectEnumeration.push({
                         objectName: objectName,
                         properties: {
-                            opacity: this.barChartSettings.generalView.opacity,
-                            showHelpLink: this.barChartSettings.generalView.showHelpLink,
-                            showDataCount: this.barChartSettings.generalView.showDataCount,
-                            showFromLeftSide: this.barChartSettings.generalView.showFromLeftSide,
-                            dataForwardTop: this.barChartSettings.generalView.dataForwardTop,
+                            opacity: this.barChartSettings.generalView.opacity, 
+                            barColor: this.barChartSettings.generalView.barColor,
+                            fontColor: this.barChartSettings.generalView.fontColor,
+                            fontSkewangle: this.barChartSettings.generalView.fontSkewangle,
+                            fontSize: this.barChartSettings.generalView.fontSize,
+                            fontFamily: this.barChartSettings.generalView.fontFamily,
+
+ 
                         },
                         validValues: {
                             opacity: {
@@ -620,15 +654,44 @@ module powerbi.extensibility.visual {
                                     max: 100
                                 }
                             },
-                            showDataCount:{
+                            fontSize: {
                                 numberRange: {
                                     min: 1,
-                                    max: 10
+                                    max: 45
+                                }
+                            },
+                            fontSkewangle: {
+                                numberRange: {
+                                    min: 1,
+                                    max: 45
                                 }
                             }
                         },
                         selector: null
                     });
+                    break;
+
+                case 'dataControl':
+                    objectEnumeration.push({
+                    objectName: objectName,
+                    properties: { 
+                        showDataCount: this.barChartSettings.dataControl.showDataCount,
+                        showFromLeftSide: this.barChartSettings.dataControl.showFromLeftSide,
+                        dataForwardTop: this.barChartSettings.dataControl.dataForwardTop,
+                        dataBarLongToShort: this.barChartSettings.dataControl.dataBarLongToShort,
+
+
+                    },
+                    validValues: { 
+                        showDataCount: {
+                            numberRange: {
+                                min: 1,
+                                max: 15
+                            }
+                        }, 
+                    },
+                    selector: null
+                });
                     break;
             };
 

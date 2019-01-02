@@ -11,6 +11,11 @@
       "kind": "Measure"
     },
     {
+      "displayName": "Display Data Value",
+      "name": "measuredisplay",
+      "kind": "Grouping"
+    },
+    {
       "displayName": "Tooltips",
       "name": "Tooltips",
       "kind": "Measure"
@@ -25,14 +30,18 @@
           },
           "measure": {
             "max": 1
+          },
+          "measuredisplay": {
+            "max": 1
           }
         }
       ],
       "categorical": {
         "categories": {
-          "for": {
-            "in": "category"
-          }
+          "select": [
+            { "for": { "in": "category" } },
+            { "for": { "in": "measuredisplay" } }
+          ]
         },
         "values": {
           "select": [
@@ -92,12 +101,148 @@
             "integer": true
           }
         },
-        "showHelpLink": {
-          "displayName": "Show Help Button",
+        "barColor": {
+          "displayName": "Bars Color",
           "type": {
-            "bool": true
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
           }
         },
+        "fontColor": {
+          "displayName": "Font Color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "fontSkewangle": {
+          "displayName": "font Skew angle",
+          "type": {
+            "integer": true
+          }
+        },
+        "fontSize": {
+          "displayName": "Text size",
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        },
+        "fontFamily": {
+          "displayName": "Font family",
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Arial",
+                "value": "Arial"
+              },
+              {
+                "displayName": "Arial Black",
+                "value": "\"Arial Black\""
+              },
+              {
+                "displayName": "Arial Unicode MS",
+                "value": "\"Arial Unicode MS\""
+              },
+              {
+                "displayName": "Calibri",
+                "value": "Calibri"
+              },
+              {
+                "displayName": "Cambria",
+                "value": "Cambria"
+              },
+              {
+                "displayName": "Cambria Math",
+                "value": "\"Cambria Math\""
+              },
+              {
+                "displayName": "Candara",
+                "value": "Candara"
+              },
+              {
+                "displayName": "Comic Sans MS",
+                "value": "\"Comic Sans MS\""
+              },
+              {
+                "displayName": "Consolas",
+                "value": "Consolas"
+              },
+              {
+                "displayName": "Constantia",
+                "value": "Constantia"
+              },
+              {
+                "displayName": "Corbel",
+                "value": "Corbel"
+              },
+              {
+                "displayName": "Courier New",
+                "value": "\"Courier New\""
+              },
+              {
+                "displayName": "Georgia",
+                "value": "Georgia"
+              },
+              {
+                "displayName": "Lucida Sans Unicode",
+                "value": "\"Lucida Sans Unicode\""
+              },
+              {
+                "displayName": "Segoe (Bold)",
+                "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+              },
+              {
+                "displayName": "Segoe UI",
+                "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+              },
+              {
+                "displayName": "Segoe UI Light",
+                "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+              },
+              {
+                "displayName": "Symbol",
+                "value": "Symbol"
+              },
+              {
+                "displayName": "Tahoma",
+                "value": "Tahoma"
+              },
+              {
+                "displayName": "Times New Roman",
+                "value": "\"Times New Roman\""
+              },
+              {
+                "displayName": "Trebuchet MS",
+                "value": "\"Trebuchet MS\""
+              },
+              {
+                "displayName": "Verdana",
+                "value": "Verdana"
+              },
+              {
+                "displayName": "Wingdings",
+                "value": "Wingdings"
+              },
+              {
+                "displayName": "wf_standard-font",
+                "value": "wf_standard-font,helvetica,arial,sans-serif"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "dataControl": {
+      "displayName": "Data Control",
+      "properties": {
         "showDataCount": {
           "displayName": "Show Data Record",
           "type": {
@@ -112,6 +257,12 @@
         },
         "dataForwardTop": {
           "displayName": "Data Top/Down",
+          "type": {
+            "bool": true
+          }
+        },
+        "dataBarLongToShort": {
+          "displayName": "Bar Length Long to Short",
           "type": {
             "bool": true
           }

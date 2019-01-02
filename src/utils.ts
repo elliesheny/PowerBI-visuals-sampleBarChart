@@ -69,28 +69,28 @@ module powerbi.extensibility.visual {
         return "M" + returnstr;
     }
 
-    export function getNamePoint(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
-        if (showleft) {
+    export function getNamePoint(d: any, i: number, _XScale: any, startpoint: any, setting: any) {
+        if (setting.dataControl.showFromLeftSide) {
             return {
-                x: startpoint.x + 15 - Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                x: startpoint.x + 10 - Math.tan(Math.PI / (180 / setting.generalView.fontSkewangle)) * (i * 100),
                 y: startpoint.y + i * 100 + 60
             };
         } else {
             return {
-                x: startpoint.x - 15 + Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                x: startpoint.x - 10 + Math.tan(Math.PI / (180 / setting.generalView.fontSkewangle)) * (i * 100),
                 y: startpoint.y + i * 100 + 60
             };
         }
     }
-    export function getValuePoint(d: any, i: number, _XScale: any, startpoint: any, showleft: boolean) {
-        if (showleft) {
+    export function getValuePoint(d: any, i: number, _XScale: any, startpoint: any, setting: any) {
+        if (setting.dataControl.showFromLeftSide) {
             return {
-                x: startpoint.x + 20 - Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                x: startpoint.x + 10 - Math.tan(Math.PI / (180 / setting.generalView.fontSkewangle)) * (i * 100),
                 y: startpoint.y + i * 100 + 90
             };
         } else {
             return {
-                x: startpoint.x - 20 + Math.tan(Math.PI / (180 / 13)) * (i * 100),
+                x: startpoint.x - 10 + Math.tan(Math.PI / (180 / setting.generalView.fontSkewangle)) * (i * 100),
                 y: startpoint.y + i * 100 + 90
             };
         }
