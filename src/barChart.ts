@@ -369,7 +369,7 @@ module powerbi.extensibility.visual {
                 })
                 .attr('fill-opacity', (settings.generalView.opacity / 200.0))
                 .attr('stroke-opacity', (settings.generalView.opacity / 200.0))
-                .attr("stroke", "#A1BEFF")
+                .attr("stroke", settings.generalView.barColor.solid.color)
                 .attr("stroke-width", 1)
                 .attr("fill", "none")
                 .classed('_bar_line', true);
